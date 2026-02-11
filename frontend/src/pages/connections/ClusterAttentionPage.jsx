@@ -74,7 +74,7 @@ export default function ClusterAttentionPage() {
 
   const fetchCredibility = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/connections/cluster-credibility?recompute=true`);
+      const res = await fetch(`${API_BASE}/api/connections/cluster-credibility`);
       const data = await res.json();
       if (data.ok) setCredibility(data.data || []);
     } catch (err) {

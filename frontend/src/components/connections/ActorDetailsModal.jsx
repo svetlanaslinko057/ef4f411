@@ -260,22 +260,33 @@ export default function ActorDetailsModal({ isOpen, onClose, actor, loading, onA
                         </div>
                         <div className="mt-2 flex flex-wrap gap-1">
                           {farm.actorIds.map((id, j) => (
-                            <span 
-                              key={j}
-                              className={`text-xs px-2 py-0.5 rounded cursor-pointer transition-colors ${
-                                id === actor.actorId 
-                                  ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' 
-                                  : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                              }`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (id !== actor.actorId && onActorClick) {
-                                  onActorClick(id);
-                                }
-                              }}
-                            >
-                              @{id}
-                            </span>
+                            <div key={j} className="inline-flex items-center gap-1">
+                              <span 
+                                className={`text-xs px-2 py-0.5 rounded cursor-pointer transition-colors ${
+                                  id === actor.actorId 
+                                    ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' 
+                                    : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                }`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (id !== actor.actorId && onActorClick) {
+                                    onActorClick(id);
+                                  }
+                                }}
+                              >
+                                @{id}
+                              </span>
+                              <a
+                                href={`https://twitter.com/${id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-500 hover:text-blue-600"
+                                onClick={(e) => e.stopPropagation()}
+                                title={`View @${id} on Twitter`}
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                              </a>
+                            </div>
                           ))}
                         </div>
                       </div>

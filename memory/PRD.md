@@ -9,7 +9,7 @@
 - **Database**: MongoDB (connections_db)
 - **Parser**: Twitter Parser V2 (port 5001)
 
-## Implemented Features (Feb 11, 2026)
+## Implemented Features
 
 ### 1. Strategy Simulation ✅ (Для ПОЛЬЗОВАТЕЛЕЙ)
 **Назначение:** "Что если следовать за определённым типом Twitter-инфлюенсеров?"
@@ -25,21 +25,29 @@
   - AVOID_PUMP_EXIT (62% hit rate, Low-Medium risk) - исключает манипуляторов
 - **Historical Events** с кликабельными @username ссылками
 
-### 2. Farm Network Graph ✅ (Для АДМИНА)
-**Назначение:** Визуализация бот-ферм и их связей
+### 2. Farm Network Graph ✅ + Interactive Modal (Feb 11, 2026)
+**Назначение:** Визуализация бот-ферм и их связей с детальной информацией по акторам
 
 **Добавлены объяснения:**
 - Блок "What is Farm Network?" с 3 карточками:
   - Bot Farms - что это
   - How We Detect - как обнаруживаем
   - Why It Matters - почему важно
-- Легенда "How to read the graph":
-  - Nodes = подозрительные аккаунты
-  - Lines = общие боты
-  - Thicker = больше общих ботов
-  - Red = 70%+ overlap (одна бот-ферма)
+- Легенда "How to read the graph"
 
-**Данные:** 10 узлов, 13 рёбер (crypto_whale_alerts, moon_signals, gem_hunter_pro...)
+**NEW - Интерактивная модалка ActorDetailsModal:**
+- Клик на узел графа или имя в таблице открывает модальное окно с детальной информацией
+- **Показывает:**
+  - Risk Level (LOW/MEDIUM/HIGH/CRITICAL) с цветовой индикацией
+  - Summary (краткое описание актора)
+  - **Audience Quality**: AQI score, % human, % bots, % suspicious, % dormant, total followers
+  - **Authenticity Score**: общий скор + breakdown (realFollowerRatio, audienceQuality, networkIntegrity)
+  - **Shared Farm Connections**: список связанных акторов (кликабельные)
+  - **Detected Bot Farms**: farmId, botRatio, confidence, участники
+- Кликабельные имена для навигации между акторами
+- Link на Twitter профиль
+
+**Данные:** 10 узлов, 12+ рёбер (crypto_whale_alerts, moon_signals, gem_hunter_pro, 100x_calls, pump_detective, etc.)
 
 ### 3. Alt Season Monitor ✅ (Для ПОЛЬЗОВАТЕЛЕЙ)
 **Назначение:** Монитор вероятности альтсезона
@@ -51,17 +59,25 @@
 - Top Opportunities: SOL (82), RNDR (78), ONDO (72), FET (68), TAO (65)
 - Token Momentum: 8 токенов
 
-## Test Results
+## Key API Endpoints
+- `GET /api/connections/network/farm-graph` - граф с узлами и рёбрами
+- `GET /api/connections/network/actor/:actorId` - детальная информация об акторе для модала
+- `GET /api/connections/simulation/strategies` - стратегии симуляции
+- `GET /api/alt-season` - данные альтсезона
+
+## Test Results (Feb 11, 2026)
 - Backend: 100% ✅
-- Frontend: 100% ✅
+- Frontend: 95% ✅ (minor backdrop click fix applied)
+- Actor Details Modal: 100% ✅
 
 ## Backlog / Next Tasks
-- [ ] Подключить реальные Twitter данные через парсер (куки включены)
+- [ ] Подключить реальные Twitter данные через парсер
 - [ ] Backers module activation
 - [ ] WebSocket real-time updates
 - [ ] Reality Leaderboard integration
+- [ ] Fix duplicate route warnings in backend
 
 ## User Personas
 - **Traders:** Strategy Simulation + Alt Season для выбора entry points
-- **Researchers:** Farm Network для анализа манипуляций
+- **Researchers:** Farm Network для анализа манипуляций и детального исследования акторов
 - **Admins:** Farm Network для выявления координированных атак

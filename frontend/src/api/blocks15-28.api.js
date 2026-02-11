@@ -88,6 +88,18 @@ export async function fetchFarmGraph(minScore = 0.35, limit = 200) {
   }
 }
 
+// Fetch detailed actor information for modal popup
+export async function fetchActorDetails(actorId) {
+  try {
+    const response = await fetch(`${API_BASE}/api/connections/network/actor/${encodeURIComponent(actorId)}`);
+    if (!response.ok) return null;
+    return response.json();
+  } catch (error) {
+    console.error('[API] fetchActorDetails error:', error);
+    return null;
+  }
+}
+
 // ===========================================
 // BLOCK 20 - Real Top Followers
 // ===========================================

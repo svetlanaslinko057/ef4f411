@@ -129,6 +129,13 @@ export async function registerBlocks15To28Routes(app: FastifyInstance, db: Db) {
     return reply.send(graph);
   });
 
+  // Get detailed actor info for modal popup
+  app.get('/api/connections/network/actor/:actorId', async (req, reply) => {
+    const { actorId } = req.params as any;
+    const details = await farmOverlapGraphService.getActorDetails(actorId);
+    return reply.send(details);
+  });
+
   app.post('/api/admin/connections/network/farm-graph/recompute', async (req, reply) => {
     const { actorIds, minSharedSuspects, limitPairs } = req.body as any;
     if (!Array.isArray(actorIds) || actorIds.length < 2) {

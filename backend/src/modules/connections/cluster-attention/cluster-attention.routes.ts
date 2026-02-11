@@ -152,14 +152,18 @@ export async function registerClusterAttentionRoutes(app: FastifyInstance) {
     try {
       const { level, recompute } = req.query as { level?: MomentumLevel; recompute?: string };
 
+      let momentum: ClusterTokenMomentum[];
+
       if (recompute === 'true') {
         // Recompute attention first
         await tokenAttentionService.computeAttention('1h');
         await tokenAttentionService.computeAttention('4h');
+        // Compute momentum
+        momentum = await tokenAttentionService.computeMomentum();
+      } else {
+        // Just return existing data from database
+        momentum = await tokenAttentionService.getTopMomentum();
       }
-
-      // Compute momentum
-      const momentum = await tokenAttentionService.computeMomentum();
 
       // Filter by level if specified
       let filtered = momentum;

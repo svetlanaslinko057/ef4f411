@@ -155,6 +155,11 @@ export default function FarmNetworkPage() {
   const [hoveredEdge, setHoveredEdge] = useState(null);
   const [layoutNodes, setLayoutNodes] = useState([]);
   const svgRef = useRef(null);
+  
+  // Modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedActor, setSelectedActor] = useState(null);
+  const [modalLoading, setModalLoading] = useState(false);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -162,6 +167,22 @@ export default function FarmNetworkPage() {
     setData(result);
     setLoading(false);
   }, [minScore]);
+
+  // Handle actor click - open modal with details
+  const handleActorClick = useCallback(async (actorId) => {
+    setModalLoading(true);
+    setModalOpen(true);
+    setSelectedActor(null);
+    
+    const details = await fetchActorDetails(actorId);
+    setSelectedActor(details);
+    setModalLoading(false);
+  }, []);
+
+  const closeModal = useCallback(() => {
+    setModalOpen(false);
+    setSelectedActor(null);
+  }, []);
 
   useEffect(() => {
     loadData();

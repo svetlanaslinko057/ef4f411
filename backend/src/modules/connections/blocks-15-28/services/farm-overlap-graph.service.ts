@@ -23,15 +23,59 @@ export interface FarmGraphData {
   edges: FarmOverlapEdge[];
 }
 
+export interface ActorDetails {
+  actorId: string;
+  audienceQuality: {
+    aqi: number;
+    level: string;
+    pctBot: number;
+    pctHuman: number;
+    pctSuspicious: number;
+    pctDormant: number;
+    reasons: string[];
+    totalFollowers: number;
+  } | null;
+  authenticity: {
+    score: number;
+    label: string;
+    breakdown: {
+      realFollowerRatio: number;
+      audienceQuality: number;
+      networkIntegrity: number;
+    };
+  } | null;
+  farmConnections: Array<{
+    connectedActor: string;
+    sharedSuspects: number;
+    overlapScore: number;
+    jaccard: number;
+  }>;
+  botFarms: Array<{
+    farmId: string;
+    actorIds: string[];
+    botRatio: number;
+    confidence: number;
+    sharedFollowers: number;
+  }>;
+  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  summary: string;
+}
+
 export class FarmOverlapGraphService {
   private actorFollowers: Collection<Document>;
   private followerFlags: Collection<Document>;
   private farmEdges: Collection<Document>;
+  private audienceQualityReports: Collection<Document>;
+  private authenticityReports: Collection<Document>;
+  private botFarms: Collection<Document>;
 
   constructor(private db: Db) {
     this.actorFollowers = db.collection('actor_followers');
     this.followerFlags = db.collection('follower_flags');
     this.farmEdges = db.collection('farm_overlap_edges');
+    this.audienceQualityReports = db.collection('audience_quality_reports');
+    this.authenticityReports = db.collection('influencer_authenticity_reports');
+    this.botFarms = db.collection('bot_farms');
   }
 
   /**

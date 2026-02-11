@@ -442,22 +442,28 @@ export default function FarmNetworkPage() {
                   {data.edges.slice(0, 10).map((edge, i) => (
                     <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-900/50">
                       <td className="px-4 py-3 text-sm">
-                        <button 
-                          onClick={() => handleActorClick(edge.a)}
-                          className="font-medium text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 hover:underline transition-colors"
-                          data-testid={`table-actor-${edge.a}`}
-                        >
-                          @{edge.a}
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button 
+                            onClick={() => handleActorClick(edge.a)}
+                            className="font-medium text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 hover:underline transition-colors"
+                            data-testid={`table-actor-${edge.a}`}
+                          >
+                            @{edge.a}
+                          </button>
+                          <TwitterLink username={edge.a} />
+                        </div>
                       </td>
                       <td className="px-4 py-3 text-sm">
-                        <button 
-                          onClick={() => handleActorClick(edge.b)}
-                          className="font-medium text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 hover:underline transition-colors"
-                          data-testid={`table-actor-${edge.b}`}
-                        >
-                          @{edge.b}
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button 
+                            onClick={() => handleActorClick(edge.b)}
+                            className="font-medium text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 hover:underline transition-colors"
+                            data-testid={`table-actor-${edge.b}`}
+                          >
+                            @{edge.b}
+                          </button>
+                          <TwitterLink username={edge.b} />
+                        </div>
                       </td>
                       <td className="px-4 py-3 text-sm text-right text-gray-600 dark:text-gray-400">{edge.sharedSuspects}</td>
                       <td className="px-4 py-3 text-sm text-right text-gray-600 dark:text-gray-400">{(edge.jaccard * 100).toFixed(1)}%</td>

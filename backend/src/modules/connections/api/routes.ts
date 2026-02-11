@@ -1398,7 +1398,7 @@ export async function registerConnectionsRoutes(app: FastifyInstance): Promise<v
         });
         
         return {
-          author_id: acc.id,
+          author_id: acc.author_id || acc.id || acc._id?.toString(),
           username: acc.handle?.replace('@', '') || acc.title,
           name: acc.title,
           avatar: acc.avatar,

@@ -425,8 +425,24 @@ export default function FarmNetworkPage() {
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {data.edges.slice(0, 10).map((edge, i) => (
                     <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-900/50">
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">{edge.a}</td>
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">{edge.b}</td>
+                      <td className="px-4 py-3 text-sm">
+                        <button 
+                          onClick={() => handleActorClick(edge.a)}
+                          className="font-medium text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 hover:underline transition-colors"
+                          data-testid={`table-actor-${edge.a}`}
+                        >
+                          @{edge.a}
+                        </button>
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        <button 
+                          onClick={() => handleActorClick(edge.b)}
+                          className="font-medium text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 hover:underline transition-colors"
+                          data-testid={`table-actor-${edge.b}`}
+                        >
+                          @{edge.b}
+                        </button>
+                      </td>
                       <td className="px-4 py-3 text-sm text-right text-gray-600 dark:text-gray-400">{edge.sharedSuspects}</td>
                       <td className="px-4 py-3 text-sm text-right text-gray-600 dark:text-gray-400">{(edge.jaccard * 100).toFixed(1)}%</td>
                       <td className="px-4 py-3 text-right">

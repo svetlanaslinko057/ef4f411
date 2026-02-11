@@ -197,13 +197,26 @@ export default function ActorDetailsModal({ isOpen, onClose, actor, loading, onA
                     {actor.farmConnections.map((conn, i) => (
                       <div 
                         key={i} 
-                        className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors"
-                        onClick={() => onActorClick && onActorClick(conn.connectedActor)}
+                        className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                         data-testid={`connection-${conn.connectedActor}`}
                       >
                         <div className="flex items-center gap-2">
-                          <span className="font-medium text-gray-900 dark:text-white">@{conn.connectedActor}</span>
-                          <ExternalLink className="w-3 h-3 text-gray-400" />
+                          <button
+                            onClick={() => onActorClick && onActorClick(conn.connectedActor)}
+                            className="font-medium text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 hover:underline transition-colors"
+                          >
+                            @{conn.connectedActor}
+                          </button>
+                          <a
+                            href={`https://twitter.com/${conn.connectedActor}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-1 text-blue-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
+                            onClick={(e) => e.stopPropagation()}
+                            title={`View @${conn.connectedActor} on Twitter`}
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
                         </div>
                         <div className="flex items-center gap-3 text-sm">
                           <span className="text-gray-500">{conn.sharedSuspects} shared</span>

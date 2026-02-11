@@ -29,7 +29,10 @@ export default function ActorDetailsModal({ isOpen, onClose, actor, loading, onA
       />
       
       {/* Modal */}
-      <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden">
+      <div 
+        className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className={`p-5 border-b border-gray-200 dark:border-gray-700 ${riskStyle.bg}`}>
           <div className="flex items-center justify-between">

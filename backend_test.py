@@ -204,6 +204,15 @@ def main():
     tester.test_alt_season()
     tester.test_market_state()
     
+    # Test 4: Strategy Simulation Endpoints
+    print("\n📋 STEP 4: Testing Strategy Simulation APIs")
+    tester.test_strategies()
+    tester.test_strategy_report()
+    
+    # Test 5: Farm Network Endpoints
+    print("\n📋 STEP 5: Testing Farm Network APIs")
+    tester.test_farm_graph()
+    
     # Print results
     print("\n" + "=" * 60)
     print("📊 FINAL RESULTS")

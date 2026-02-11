@@ -5,8 +5,78 @@
  */
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { Network, RefreshCw, AlertTriangle, Users, Filter } from 'lucide-react';
+import { Network, RefreshCw, AlertTriangle, Users, Filter, Info, ChevronDown, ChevronUp, HelpCircle, Shield, Skull, Eye } from 'lucide-react';
 import { fetchFarmGraph } from '../../api/blocks15-28.api';
+
+// How It Works explanatory section
+function HowItWorksSection() {
+  const [expanded, setExpanded] = useState(true);
+  
+  return (
+    <div className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-xl p-5 border border-red-200 dark:border-red-800 mb-6">
+      <button 
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center justify-between"
+      >
+        <div className="flex items-center gap-2">
+          <Info className="w-5 h-5 text-red-600 dark:text-red-400" />
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">What is Farm Network?</h2>
+        </div>
+        {expanded ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
+      </button>
+      
+      {expanded && (
+        <div className="mt-4 space-y-4">
+          <p className="text-gray-700 dark:text-gray-300">
+            This tool detects <strong>coordinated bot networks</strong> by analyzing shared suspicious followers between Twitter accounts.
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Skull className="w-5 h-5 text-red-500" />
+                <h3 className="font-medium text-gray-900 dark:text-white">Bot Farms</h3>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Groups of fake accounts used to artificially inflate followers and engagement. Often controlled by the same operator.
+              </p>
+            </div>
+            
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Eye className="w-5 h-5 text-orange-500" />
+                <h3 className="font-medium text-gray-900 dark:text-white">How We Detect</h3>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                We analyze follower overlap between accounts. High overlap = likely using the same bot farm to inflate numbers.
+              </p>
+            </div>
+            
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Shield className="w-5 h-5 text-green-500" />
+                <h3 className="font-medium text-gray-900 dark:text-white">Why It Matters</h3>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Accounts using bot farms are less trustworthy. Their "influence" is artificial - avoid following their trading signals.
+              </p>
+            </div>
+          </div>
+          
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-3 text-sm">
+            <strong className="text-yellow-700 dark:text-yellow-400">How to read the graph:</strong>
+            <ul className="text-yellow-600 dark:text-yellow-300 mt-1 space-y-1">
+              <li>• <strong>Nodes</strong> = Twitter accounts suspected of using bot farms</li>
+              <li>• <strong>Lines</strong> = Shared suspicious followers between accounts</li>
+              <li>• <strong>Thicker lines</strong> = More shared bots (stronger connection)</li>
+              <li>• <strong>Red lines</strong> = Very high overlap (70%+) - likely same bot farm</li>
+            </ul>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 // Simple force-directed layout calculation
 function calculateLayout(nodes, edges, width, height) {

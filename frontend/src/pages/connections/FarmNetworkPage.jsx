@@ -1,0 +1,344 @@
+/**
+ * Farm Network Graph Page (Block 19)
+ * 
+ * Visualizes shared bot farm connections between influencers
+ */
+
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { Network, RefreshCw, AlertTriangle, Users, Filter } from 'lucide-react';
+import { fetchFarmGraph } from '../../api/blocks15-28.api';
+
+// Simple force-directed layout calculation
+function calculateLayout(nodes, edges, width, height) {
+  const nodeMap = new Map();
+  
+  // Initialize positions randomly
+  nodes.forEach((node, i) => {
+    const angle = (i / nodes.length) * 2 * Math.PI;
+    const radius = Math.min(width, height) * 0.35;
+    nodeMap.set(node.id, {
+      ...node,
+      x: width / 2 + Math.cos(angle) * radius,
+      y: height / 2 + Math.sin(angle) * radius,
+      vx: 0,
+      vy: 0
+    });
+  });
+
+  // Simple force simulation (few iterations)
+  for (let iter = 0; iter < 50; iter++) {
+    // Repulsion between all nodes
+    for (const [id1, n1] of nodeMap) {
+      for (const [id2, n2] of nodeMap) {
+        if (id1 >= id2) continue;
+        const dx = n2.x - n1.x;
+        const dy = n2.y - n1.y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        const force = 5000 / (dist * dist);
+        const fx = (dx / dist) * force;
+        const fy = (dy / dist) * force;
+        n1.vx -= fx;
+        n1.vy -= fy;
+        n2.vx += fx;
+        n2.vy += fy;
+      }
+    }
+
+    // Attraction along edges
+    edges.forEach(edge => {
+      const n1 = nodeMap.get(edge.a);
+      const n2 = nodeMap.get(edge.b);
+      if (!n1 || !n2) return;
+      const dx = n2.x - n1.x;
+      const dy = n2.y - n1.y;
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      const force = dist * 0.01 * (edge.overlapScore || 0.5);
+      const fx = (dx / dist) * force;
+      const fy = (dy / dist) * force;
+      n1.vx += fx;
+      n1.vy += fy;
+      n2.vx -= fx;
+      n2.vy -= fy;
+    });
+
+    // Apply velocities with damping
+    for (const node of nodeMap.values()) {
+      node.x += node.vx * 0.1;
+      node.y += node.vy * 0.1;
+      node.vx *= 0.9;
+      node.vy *= 0.9;
+      // Keep in bounds
+      node.x = Math.max(50, Math.min(width - 50, node.x));
+      node.y = Math.max(50, Math.min(height - 50, node.y));
+    }
+  }
+
+  return Array.from(nodeMap.values());
+}
+
+export default function FarmNetworkPage() {
+  const [data, setData] = useState({ nodes: [], edges: [] });
+  const [loading, setLoading] = useState(true);
+  const [minScore, setMinScore] = useState(0.35);
+  const [hoveredNode, setHoveredNode] = useState(null);
+  const [hoveredEdge, setHoveredEdge] = useState(null);
+  const [layoutNodes, setLayoutNodes] = useState([]);
+  const svgRef = useRef(null);
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    const result = await fetchFarmGraph(minScore, 200);
+    setData(result);
+    setLoading(false);
+  }, [minScore]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  useEffect(() => {
+    if (data.nodes.length > 0) {
+      const width = 900;
+      const height = 600;
+      const laid = calculateLayout(data.nodes, data.edges, width, height);
+      setLayoutNodes(laid);
+    }
+  }, [data]);
+
+  const getEdgeColor = (score) => {
+    if (score >= 0.7) return '#EF4444';
+    if (score >= 0.5) return '#F97316';
+    return '#EAB308';
+  };
+
+  const getEdgeWidth = (score) => {
+    return 1 + score * 4;
+  };
+
+  const nodeMap = new Map(layoutNodes.map(n => [n.id, n]));
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <Network className="w-6 h-6 text-purple-500" />
+              Farm Network Graph
+            </h1>
+            <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+              Shared suspicious followers between influencers
+            </p>
+          </div>
+          <button
+            onClick={loadData}
+            disabled={loading}
+            className="flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:opacity-50"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+        </div>
+
+        {/* Controls */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 mb-6 shadow-sm">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <Filter className="w-4 h-4 text-gray-400" />
+              <label className="text-sm text-gray-600 dark:text-gray-300">Min Score:</label>
+              <input
+                type="range"
+                min="0.1"
+                max="0.9"
+                step="0.05"
+                value={minScore}
+                onChange={(e) => setMinScore(Number(e.target.value))}
+                className="w-32"
+              />
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300 w-12">
+                {minScore.toFixed(2)}
+              </span>
+            </div>
+            <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+              <span className="flex items-center gap-1">
+                <div className="w-3 h-3 rounded-full bg-purple-500" />
+                Nodes: {data.nodes.length}
+              </span>
+              <span className="flex items-center gap-1">
+                <div className="w-6 h-0.5 bg-red-500" />
+                Edges: {data.edges.length}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Graph */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+          {loading ? (
+            <div className="h-[600px] flex items-center justify-center">
+              <RefreshCw className="w-8 h-8 animate-spin text-purple-500" />
+            </div>
+          ) : data.nodes.length === 0 ? (
+            <div className="h-[600px] flex flex-col items-center justify-center text-gray-500">
+              <AlertTriangle className="w-12 h-12 mb-4 text-yellow-500" />
+              <p>No farm connections found above threshold {minScore}</p>
+              <p className="text-sm mt-1">Try lowering the minimum score</p>
+            </div>
+          ) : (
+            <svg
+              ref={svgRef}
+              width="100%"
+              height="600"
+              viewBox="0 0 900 600"
+              className="bg-gray-50 dark:bg-gray-900"
+            >
+              {/* Edges */}
+              {data.edges.map((edge, i) => {
+                const source = nodeMap.get(edge.a);
+                const target = nodeMap.get(edge.b);
+                if (!source || !target) return null;
+                const isHovered = hoveredEdge === i;
+                return (
+                  <g key={`edge-${i}`}>
+                    <line
+                      x1={source.x}
+                      y1={source.y}
+                      x2={target.x}
+                      y2={target.y}
+                      stroke={getEdgeColor(edge.overlapScore)}
+                      strokeWidth={getEdgeWidth(edge.overlapScore)}
+                      strokeOpacity={isHovered ? 1 : 0.6}
+                      onMouseEnter={() => setHoveredEdge(i)}
+                      onMouseLeave={() => setHoveredEdge(null)}
+                      className="cursor-pointer"
+                    />
+                    {isHovered && (
+                      <text
+                        x={(source.x + target.x) / 2}
+                        y={(source.y + target.y) / 2 - 10}
+                        textAnchor="middle"
+                        className="text-xs fill-gray-700 dark:fill-gray-300"
+                      >
+                        {edge.sharedSuspects} shared ({(edge.overlapScore * 100).toFixed(0)}%)
+                      </text>
+                    )}
+                  </g>
+                );
+              })}
+
+              {/* Nodes */}
+              {layoutNodes.map((node) => {
+                const isHovered = hoveredNode === node.id;
+                const connections = data.edges.filter(e => e.a === node.id || e.b === node.id).length;
+                return (
+                  <g
+                    key={node.id}
+                    onMouseEnter={() => setHoveredNode(node.id)}
+                    onMouseLeave={() => setHoveredNode(null)}
+                    className="cursor-pointer"
+                  >
+                    <circle
+                      cx={node.x}
+                      cy={node.y}
+                      r={isHovered ? 14 : 10 + connections}
+                      fill={connections > 3 ? '#EF4444' : connections > 1 ? '#F97316' : '#8B5CF6'}
+                      stroke={isHovered ? '#fff' : 'transparent'}
+                      strokeWidth={2}
+                      opacity={isHovered ? 1 : 0.8}
+                    />
+                    <text
+                      x={node.x}
+                      y={node.y + (isHovered ? 24 : 22)}
+                      textAnchor="middle"
+                      className={`text-xs ${isHovered ? 'font-medium fill-gray-900 dark:fill-white' : 'fill-gray-600 dark:fill-gray-400'}`}
+                    >
+                      {node.id.length > 12 ? node.id.slice(0, 12) + '...' : node.id}
+                    </text>
+                    {isHovered && (
+                      <text
+                        x={node.x}
+                        y={node.y - 18}
+                        textAnchor="middle"
+                        className="text-xs font-medium fill-purple-600 dark:fill-purple-400"
+                      >
+                        {connections} connections
+                      </text>
+                    )}
+                  </g>
+                );
+              })}
+            </svg>
+          )}
+        </div>
+
+        {/* Legend */}
+        <div className="mt-4 bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Legend</h3>
+          <div className="flex flex-wrap gap-6 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full bg-purple-500" />
+              <span className="text-gray-600 dark:text-gray-400">1 connection</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full bg-orange-500" />
+              <span className="text-gray-600 dark:text-gray-400">2-3 connections</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full bg-red-500" />
+              <span className="text-gray-600 dark:text-gray-400">4+ connections</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-1 rounded bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500" />
+              <span className="text-gray-600 dark:text-gray-400">Edge = overlap strength</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Top Edges Table */}
+        {data.edges.length > 0 && (
+          <div className="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                <Users className="w-5 h-5 text-orange-500" />
+                Top Shared Farm Connections
+              </h3>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-gray-900">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actor A</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actor B</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Shared</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Jaccard</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Score</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  {data.edges.slice(0, 10).map((edge, i) => (
+                    <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-900/50">
+                      <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">{edge.a}</td>
+                      <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">{edge.b}</td>
+                      <td className="px-4 py-3 text-sm text-right text-gray-600 dark:text-gray-400">{edge.sharedSuspects}</td>
+                      <td className="px-4 py-3 text-sm text-right text-gray-600 dark:text-gray-400">{(edge.jaccard * 100).toFixed(1)}%</td>
+                      <td className="px-4 py-3 text-right">
+                        <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${
+                          edge.overlapScore >= 0.7 ? 'bg-red-100 text-red-700' :
+                          edge.overlapScore >= 0.5 ? 'bg-orange-100 text-orange-700' :
+                          'bg-yellow-100 text-yellow-700'
+                        }`}>
+                          {(edge.overlapScore * 100).toFixed(0)}%
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

@@ -64,7 +64,7 @@ export default function ClusterAttentionPage() {
 
   const fetchMomentum = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/connections/cluster-momentum?recompute=true`);
+      const res = await fetch(`${API_BASE}/api/connections/cluster-momentum`);
       const data = await res.json();
       if (data.ok) setMomentum(data.data || []);
     } catch (err) {

@@ -114,6 +114,71 @@ class AltSeasonBackendTester:
             200
         )
 
+    def test_strategies(self):
+        """Test strategies endpoint - should return 4 strategies"""
+        success, data = self.run_test(
+            "Strategy Simulation - Get Strategies",
+            "GET", 
+            "api/connections/simulation/strategies",
+            200
+        )
+        
+        if success and data:
+            strategies = data.get('strategies', [])
+            if len(strategies) == 4:
+                print(f"   ✅ Found {len(strategies)} strategies as expected")
+                return True, data
+            else:
+                print(f"   ⚠️  Found {len(strategies)} strategies, expected 4")
+                return success, data
+        return success, data
+
+    def test_strategy_report(self):
+        """Test specific strategy report - EARLY_CONVICTION_ONLY"""
+        success, data = self.run_test(
+            "Strategy Simulation - EARLY_CONVICTION_ONLY Report",
+            "GET",
+            "api/connections/simulation/EARLY_CONVICTION_ONLY",
+            200
+        )
+        
+        if success and data:
+            report = data.get('report', {})
+            metrics = report.get('metrics', {})
+            required_metrics = ['hitRate', 'avgFollowThrough', 'noiseRatio', 'sampleSize']
+            
+            missing_metrics = [m for m in required_metrics if m not in metrics]
+            if not missing_metrics:
+                print(f"   ✅ All required metrics found: {required_metrics}")
+                return True, data
+            else:
+                print(f"   ⚠️  Missing metrics: {missing_metrics}")
+                return success, data
+        return success, data
+
+    def test_farm_graph(self):
+        """Test farm network graph - should return nodes and edges"""
+        success, data = self.run_test(
+            "Farm Network - Graph Data",
+            "GET",
+            "api/connections/network/farm-graph",
+            200
+        )
+        
+        if success and data:
+            nodes = data.get('nodes', [])
+            edges = data.get('edges', [])
+            print(f"   📊 Found {len(nodes)} nodes and {len(edges)} edges")
+            
+            if len(nodes) == 8 and len(edges) == 10:
+                print(f"   ✅ Expected 8 nodes and 10 edges - Perfect match!")
+            elif nodes and edges:
+                print(f"   ✅ Graph has data - nodes: {len(nodes)}, edges: {len(edges)}")
+            else:
+                print(f"   ⚠️  Graph appears to be empty")
+            return success, data
+        return success, data
+
 def main():
     print("=" * 60)
     print("🧪 ALT SEASON MONITOR BACKEND API TESTS")

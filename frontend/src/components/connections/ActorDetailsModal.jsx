@@ -41,9 +41,23 @@ export default function ActorDetailsModal({ isOpen, onClose, actor, loading, onA
                 <Skull className={`w-6 h-6 ${riskStyle.text}`} />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white" data-testid="actor-name">
-                  @{actor?.actorId || 'Loading...'}
-                </h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white" data-testid="actor-name">
+                    @{actor?.actorId || 'Loading...'}
+                  </h2>
+                  {actor && (
+                    <a
+                      href={`https://twitter.com/${actor.actorId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded-full transition-colors"
+                      data-testid="twitter-profile-link"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      Twitter
+                    </a>
+                  )}
+                </div>
                 {actor && (
                   <span className={`inline-flex px-2 py-0.5 rounded text-xs font-semibold ${riskStyle.bg} ${riskStyle.text}`} data-testid="risk-level">
                     {actor.riskLevel} RISK

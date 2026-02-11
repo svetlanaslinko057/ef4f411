@@ -462,6 +462,15 @@ export default function FarmNetworkPage() {
           </div>
         )}
       </div>
+
+      {/* Actor Details Modal */}
+      <ActorDetailsModal
+        isOpen={modalOpen}
+        onClose={closeModal}
+        actor={selectedActor}
+        loading={modalLoading}
+        onActorClick={handleActorClick}
+      />
     </div>
   );
 }

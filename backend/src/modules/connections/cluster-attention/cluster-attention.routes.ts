@@ -8,7 +8,7 @@ import { Db } from 'mongodb';
 import { getMongoDb } from '../../../db/mongoose.js';
 import { clusterExtractionService } from './cluster-extraction.service.js';
 import { tokenAttentionService } from './token-attention.service.js';
-import { TimeWindow, MomentumLevel } from './cluster.types.js';
+import { TimeWindow, MomentumLevel, ClusterTokenMomentum } from './cluster.types.js';
 
 export async function registerClusterAttentionRoutes(app: FastifyInstance) {
   const db = getMongoDb();

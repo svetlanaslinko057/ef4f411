@@ -105,7 +105,32 @@ export class TokenAttentionService {
     const windowMs = WINDOWS[window];
     const since = new Date(Date.now() - windowMs);
 
-    // Get tweets with token mentions
+    const mentions: TokenMention[] = [];
+
+    // Check twitter_parsed_tweets collection first
+    const twitterParsedTweets = await this.db!.collection('twitter_parsed_tweets')
+      .find({
+        createdAt: { $gte: since },
+      })
+      .limit(5000)
+      .toArray();
+
+    for (const tweet of twitterParsedTweets) {
+      const tokens = tweet.tokens || this.extractCashtags(tweet.text || '');
+      for (const token of tokens) {
+        mentions.push({
+          token: (typeof token === 'string' ? token : token.symbol || token).toUpperCase().replace('$', ''),
+          actorId: (tweet.username || tweet.authorId || '').toLowerCase(),
+          timestamp: tweet.createdAt,
+          weight: this.calculateEngagementWeight(tweet),
+          tweetId: tweet._id?.toString() || '',
+          reach: tweet.impressions || 0,
+          authority: tweet.authorAuthority || 0.5,
+        });
+      }
+    }
+
+    // Get tweets with token mentions from parsed_tweets
     const tweets = await this.db!.collection('parsed_tweets')
       .find({
         parsedAt: { $gte: since },
@@ -113,8 +138,6 @@ export class TokenAttentionService {
       })
       .limit(5000)
       .toArray();
-
-    const mentions: TokenMention[] = [];
 
     for (const tweet of tweets) {
       const tokens = tweet.tokens || [];

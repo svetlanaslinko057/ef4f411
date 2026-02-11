@@ -366,7 +366,7 @@ const ConnectionsEarlySignalPage = () => {
   
   const [filters, setFilters] = useState({
     profiles: [],
-    badges: ['breakout', 'rising'],
+    badges: [],  // Show all by default
     hideHighRisk: false,
   });
 

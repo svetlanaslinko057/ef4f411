@@ -6,7 +6,8 @@
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Network, RefreshCw, AlertTriangle, Users, Filter, Info, ChevronDown, ChevronUp, HelpCircle, Shield, Skull, Eye } from 'lucide-react';
-import { fetchFarmGraph } from '../../api/blocks15-28.api';
+import { fetchFarmGraph, fetchActorDetails } from '../../api/blocks15-28.api';
+import ActorDetailsModal from '../../components/connections/ActorDetailsModal';
 
 // How It Works explanatory section
 function HowItWorksSection() {

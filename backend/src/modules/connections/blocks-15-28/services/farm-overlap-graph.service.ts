@@ -239,4 +239,108 @@ export class FarmOverlapGraphService {
 
     return results.sort((x, y) => y.sharedSuspects - x.sharedSuspects).slice(0, limit);
   }
+
+  /**
+   * Get detailed actor info for popup modal
+   */
+  async getActorDetails(actorId: string): Promise<ActorDetails> {
+    // 1. Get audience quality report
+    const aqReport = await this.audienceQualityReports.findOne(
+      { actorId },
+      { projection: { _id: 0 } }
+    ) as any;
+
+    // 2. Get authenticity report
+    const authReport = await this.authenticityReports.findOne(
+      { actorId },
+      { projection: { _id: 0 } }
+    ) as any;
+
+    // 3. Get farm connections (edges where this actor is involved)
+    const farmEdges = await this.farmEdges
+      .find({
+        $or: [{ a: actorId }, { b: actorId }]
+      })
+      .sort({ overlapScore: -1 })
+      .limit(10)
+      .toArray();
+
+    const farmConnections = farmEdges.map((edge: any) => ({
+      connectedActor: edge.a === actorId ? edge.b : edge.a,
+      sharedSuspects: edge.sharedSuspects,
+      overlapScore: edge.overlapScore,
+      jaccard: edge.jaccard
+    }));
+
+    // 4. Get bot farms this actor is part of
+    const botFarmDocs = await this.botFarms
+      .find({ actorIds: actorId })
+      .limit(5)
+      .toArray();
+
+    const botFarmsData = botFarmDocs.map((farm: any) => ({
+      farmId: farm.farmId,
+      actorIds: farm.actorIds,
+      botRatio: farm.botRatio,
+      confidence: farm.confidence,
+      sharedFollowers: farm.sharedFollowers
+    }));
+
+    // 5. Calculate risk level
+    const botPct = aqReport?.pctBot ?? 0;
+    const suspiciousPct = aqReport?.pctSuspicious ?? 0;
+    const authScore = authReport?.score ?? 100;
+    const connectionsCount = farmConnections.length;
+
+    let riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' = 'LOW';
+    if (botPct > 40 || suspiciousPct > 50 || authScore < 30 || connectionsCount > 5) {
+      riskLevel = 'CRITICAL';
+    } else if (botPct > 25 || suspiciousPct > 35 || authScore < 50 || connectionsCount > 3) {
+      riskLevel = 'HIGH';
+    } else if (botPct > 15 || suspiciousPct > 20 || authScore < 70 || connectionsCount > 1) {
+      riskLevel = 'MEDIUM';
+    }
+
+    // 6. Generate summary
+    const summaryParts: string[] = [];
+    if (aqReport) {
+      summaryParts.push(`Audience: ${aqReport.pctHuman}% human, ${aqReport.pctBot}% bots`);
+    }
+    if (authReport) {
+      summaryParts.push(`Authenticity: ${authReport.score}/100 (${authReport.label})`);
+    }
+    if (farmConnections.length > 0) {
+      summaryParts.push(`Connected to ${farmConnections.length} other suspicious accounts`);
+    }
+    if (botFarmsData.length > 0) {
+      summaryParts.push(`Part of ${botFarmsData.length} detected bot farm(s)`);
+    }
+
+    const summary = summaryParts.length > 0 
+      ? summaryParts.join('. ') + '.'
+      : 'No detailed data available for this actor.';
+
+    return {
+      actorId,
+      audienceQuality: aqReport ? {
+        aqi: aqReport.aqi,
+        level: aqReport.level,
+        pctBot: aqReport.pctBot,
+        pctHuman: aqReport.pctHuman,
+        pctSuspicious: aqReport.pctSuspicious,
+        pctDormant: aqReport.pctDormant,
+        reasons: aqReport.reasons || [],
+        totalFollowers: aqReport.totalFollowers
+      } : null,
+      authenticity: authReport ? {
+        score: authReport.score,
+        label: authReport.label,
+        breakdown: authReport.breakdown
+      } : null,
+      farmConnections,
+      botFarms: botFarmsData,
+      riskLevel,
+      summary
+    };
+  }
 }

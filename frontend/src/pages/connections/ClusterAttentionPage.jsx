@@ -84,7 +84,7 @@ export default function ClusterAttentionPage() {
 
   const fetchAlignments = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/connections/cluster-alignment?recompute=true`);
+      const res = await fetch(`${API_BASE}/api/connections/cluster-alignment`);
       const data = await res.json();
       if (data.ok) setAlignments(data.data || []);
     } catch (err) {

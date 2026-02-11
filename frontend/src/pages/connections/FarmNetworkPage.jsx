@@ -331,7 +331,9 @@ export default function FarmNetworkPage() {
                     key={node.id}
                     onMouseEnter={() => setHoveredNode(node.id)}
                     onMouseLeave={() => setHoveredNode(null)}
+                    onClick={() => handleActorClick(node.id)}
                     className="cursor-pointer"
+                    data-testid={`graph-node-${node.id}`}
                   >
                     <circle
                       cx={node.x}
@@ -351,14 +353,24 @@ export default function FarmNetworkPage() {
                       {node.id.length > 12 ? node.id.slice(0, 12) + '...' : node.id}
                     </text>
                     {isHovered && (
-                      <text
-                        x={node.x}
-                        y={node.y - 18}
-                        textAnchor="middle"
-                        className="text-xs font-medium fill-purple-600 dark:fill-purple-400"
-                      >
-                        {connections} connections
-                      </text>
+                      <>
+                        <text
+                          x={node.x}
+                          y={node.y - 18}
+                          textAnchor="middle"
+                          className="text-xs font-medium fill-purple-600 dark:fill-purple-400"
+                        >
+                          {connections} connections
+                        </text>
+                        <text
+                          x={node.x}
+                          y={node.y - 32}
+                          textAnchor="middle"
+                          className="text-[10px] fill-gray-500 dark:fill-gray-400"
+                        >
+                          Click for details
+                        </text>
+                      </>
                     )}
                   </g>
                 );

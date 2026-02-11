@@ -1,7 +1,7 @@
 # FOMO Connections Module - PRD
 
 ## Original Problem Statement
-Развернуть проект с модулями Connections и Twitter-парсинга. Запустить Strategy Simulation, Farm Network Graph и Alt Season Monitor с понятными объяснениями для пользователей.
+Развернуть проект с модулями Connections и Twitter-парсинга. Запустить Strategy Simulation, Farm Network Graph, Alt Season Monitor, Cluster Attention и Early Signal Radar с понятными объяснениями для пользователей.
 
 ## Architecture
 - **Backend**: Node.js Fastify (port 8003) через Python FastAPI proxy (port 8001)
@@ -11,73 +11,111 @@
 
 ## Implemented Features
 
-### 1. Strategy Simulation ✅ (Для ПОЛЬЗОВАТЕЛЕЙ)
+### 1. Strategy Simulation ✅
 **Назначение:** "Что если следовать за определённым типом Twitter-инфлюенсеров?"
 
 **Добавлены объяснения:**
 - Блок "How Strategy Simulation Works" с вопросом-ответом
 - Кто такие **Actors** (инфлюенсеры с поведенческими профилями)
 - Что означают **метрики** (Hit Rate, Follow Through, Noise Ratio, Sample Size)
-- **4 стратегии** с раскрывающимися описаниями:
-  - EARLY_CONVICTION_ONLY (68% hit rate, High risk) - охотники за альфой
-  - LONG_TERM_ACCUMULATORS (58% hit rate, Low risk) - терпеливые строители
-  - HIGH_AUTHENTICITY (72% hit rate, Medium risk) - проверенные инфлюенсеры
-  - AVOID_PUMP_EXIT (62% hit rate, Low-Medium risk) - исключает манипуляторов
-- **Historical Events** с кликабельными @username ссылками
+- **4 стратегии** с раскрывающимися описаниями
 
-### 2. Farm Network Graph ✅ + Interactive Modal (Feb 11, 2026)
-**Назначение:** Визуализация бот-ферм и их связей с детальной информацией по акторам
+### 2. Farm Network Graph ✅ + Interactive Modal + Twitter Links
+**Назначение:** Визуализация бот-ферм и их связей с детальной информацией
 
-**Добавлены объяснения:**
-- Блок "What is Farm Network?" с 3 карточками:
-  - Bot Farms - что это
-  - How We Detect - как обнаруживаем
-  - Why It Matters - почему важно
-- Легенда "How to read the graph"
+**Функции:**
+- Интерактивный граф с кликабельными узлами
+- **ActorDetailsModal** - модальное окно при клике:
+  - Risk Level, Audience Quality (AQI, % bots, % human)
+  - Authenticity Score с breakdown
+  - Shared Farm Connections (кликабельные)
+  - Detected Bot Farms
+- **Twitter ссылки** везде: в таблице, в модалке, в header
 
-**NEW - Интерактивная модалка ActorDetailsModal:**
-- Клик на узел графа или имя в таблице открывает модальное окно с детальной информацией
-- **Показывает:**
-  - Risk Level (LOW/MEDIUM/HIGH/CRITICAL) с цветовой индикацией
-  - Summary (краткое описание актора)
-  - **Audience Quality**: AQI score, % human, % bots, % suspicious, % dormant, total followers
-  - **Authenticity Score**: общий скор + breakdown (realFollowerRatio, audienceQuality, networkIntegrity)
-  - **Shared Farm Connections**: список связанных акторов (кликабельные)
-  - **Detected Bot Farms**: farmId, botRatio, confidence, участники
-- Кликабельные имена для навигации между акторами
-- Link на Twitter профиль
+**Данные:** 10 узлов, 12+ рёбер (crypto_whale_alerts, moon_signals, etc.)
 
-**Данные:** 10 узлов, 12+ рёбер (crypto_whale_alerts, moon_signals, gem_hunter_pro, 100x_calls, pump_detective, etc.)
-
-### 3. Alt Season Monitor ✅ (Для ПОЛЬЗОВАТЕЛЕЙ)
+### 3. Alt Season Monitor ✅
 **Назначение:** Монитор вероятности альтсезона
 
-**Метрики:**
-- ASP: 45% (PRE_ALT)
-- Market State: ALT_NEUTRAL
-- Performance: 50% Hit Rate, 20% False Signals, 10 Tracked
-- Top Opportunities: SOL (82), RNDR (78), ONDO (72), FET (68), TAO (65)
-- Token Momentum: 8 токенов
+**Метрики:** ASP 45%, Market State ALT_NEUTRAL, Top Opportunities: SOL, RNDR, ONDO
+
+### 4. Cluster Attention ✅ (Feb 11, 2026 - NEW)
+**Назначение:** Детектор координированной активности инфлюенсерских кластеров
+
+**Компоненты:**
+- **Influencer Clusters**: 2 кластера
+  - Cluster 0: 13 members (a16z, paradigm, sequoia, cobie, hsaka, etc.)
+  - Cluster 1: 5 members (raoulpal, willywoo, pentoshi, etc.)
+  
+- **Coordinated Momentum**:
+  - ONDO - 4.15 - **PUMP_LIKE** 🔴
+  - ARB - 2.41 - **PUMP_LIKE** 🔴
+  - SOL - 1.85 - **MOMENTUM** 🟠
+  - BTC - 0.92 - **ATTENTION** 🟡
+  - ETH - 0.55 - **ATTENTION** 🟡
+  
+- **Cluster Credibility**: 
+  - Cluster 0: 64% score, 67% confirmation rate
+  - Cluster 1: 5% score
+  
+- **Price Alignments**:
+  - ARB - CONFIRMED 🟢 (Return: 3.69%)
+  - ETH - CONFIRMED 🟢 (Return: 3.70%)
+  - BTC - LAGGING 🟡
+
+### 5. Early Signal Radar ✅ (Feb 11, 2026 - NEW)
+**Назначение:** Идентификация аккаунтов до того как они станут значимыми
+
+**Функции:**
+- **8 ACCOUNTS** с профилями:
+  - Whales: megawhale (2.65M), cryptoking (1.5M)
+  - Influencers: defi_master, alpha_seeker, chart_wizard
+  - Retail: degen_trader, moon_hunter, crypto_newbie
+- Фильтры: Retail, Influencer, Whale, Breakout, Rising
+- График Influence Score vs Acceleration
+- Compare режим
+- Table view
 
 ## Key API Endpoints
-- `GET /api/connections/network/farm-graph` - граф с узлами и рёбрами
-- `GET /api/connections/network/actor/:actorId` - детальная информация об акторе для модала
-- `GET /api/connections/simulation/strategies` - стратегии симуляции
+- `GET /api/connections/network/farm-graph` - граф бот-ферм
+- `GET /api/connections/network/actor/:actorId` - детали актора
+- `GET /api/connections/clusters` - кластеры инфлюенсеров
+- `GET /api/connections/cluster-momentum` - momentum токенов
+- `GET /api/connections/cluster-credibility` - credibility кластеров
+- `GET /api/connections/cluster-alignment` - price alignments
+- `GET /api/connections/radar/accounts` - radar accounts
 - `GET /api/alt-season` - данные альтсезона
+- `GET /api/connections/simulation/strategies` - стратегии симуляции
+
+## MongoDB Collections (Seeded Data)
+- `twitter_accounts` - 22 accounts (VCs, KOLs, Analysts, Founders)
+- `connections_follow_graph` - 89 edges
+- `twitter_parsed_tweets` - 23 tweets with token mentions
+- `influencer_clusters` - 2 clusters
+- `cluster_token_attention` - 11 records
+- `cluster_token_momentum` - 6 records
+- `cluster_credibility` - 2 records
+- `cluster_alignments` - 1 record
+- `connections_unified_accounts` - 8 radar accounts
+- `farm_overlap_edges` - 12+ edges
+- `audience_quality_reports`, `influencer_authenticity_reports`, `bot_farms`
 
 ## Test Results (Feb 11, 2026)
 - Backend: 100% ✅
-- Frontend: 95% ✅ (minor backdrop click fix applied)
-- Actor Details Modal: 100% ✅
+- Frontend: 100% ✅
+- Farm Network Modal: ✅
+- Cluster Attention: ✅
+- Early Signal Radar: ✅
 
 ## Backlog / Next Tasks
 - [ ] Подключить реальные Twitter данные через парсер
+- [ ] Add more VC accounts for larger dataset
 - [ ] Backers module activation
 - [ ] WebSocket real-time updates
 - [ ] Reality Leaderboard integration
 - [ ] Fix duplicate route warnings in backend
 
 ## User Personas
-- **Traders:** Strategy Simulation + Alt Season для выбора entry points
-- **Researchers:** Farm Network для анализа манипуляций и детального исследования акторов
-- **Admins:** Farm Network для выявления координированных атак
+- **Traders:** Strategy Simulation + Alt Season + Cluster Attention для выбора entry points
+- **Researchers:** Farm Network + Early Signal Radar для анализа манипуляций
+- **Admins:** Farm Network + Cluster Attention для выявления координированных атак

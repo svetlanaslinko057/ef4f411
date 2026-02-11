@@ -5,9 +5,25 @@
  */
 
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { Network, RefreshCw, AlertTriangle, Users, Filter, Info, ChevronDown, ChevronUp, HelpCircle, Shield, Skull, Eye } from 'lucide-react';
+import { Network, RefreshCw, AlertTriangle, Users, Filter, Info, ChevronDown, ChevronUp, HelpCircle, Shield, Skull, Eye, ExternalLink } from 'lucide-react';
 import { fetchFarmGraph, fetchActorDetails } from '../../api/blocks15-28.api';
 import ActorDetailsModal from '../../components/connections/ActorDetailsModal';
+
+// Twitter link component
+function TwitterLink({ username, className = "" }) {
+  return (
+    <a
+      href={`https://twitter.com/${username}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`inline-flex items-center gap-1 text-blue-500 hover:text-blue-600 transition-colors ${className}`}
+      onClick={(e) => e.stopPropagation()}
+      title={`View @${username} on Twitter`}
+    >
+      <ExternalLink className="w-3 h-3" />
+    </a>
+  );
+}
 
 // How It Works explanatory section
 function HowItWorksSection() {

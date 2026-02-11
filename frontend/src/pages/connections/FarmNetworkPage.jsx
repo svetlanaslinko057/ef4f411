@@ -211,6 +211,9 @@ export default function FarmNetworkPage() {
           </button>
         </div>
 
+        {/* How It Works */}
+        <HowItWorksSection />
+
         {/* Controls */}
         <div className="bg-white dark:bg-gray-800 rounded-lg p-4 mb-6 shadow-sm">
           <div className="flex items-center gap-6">
